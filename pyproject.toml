@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "phone-picture-backup"
+version = "0.1.0"
+description = ""
+authors = ["Joakim Weckman <joakim.weckman@gmail.com>"]
+readme = "README.md"
+packages = [{include = "phone_picture_backup"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pysimplegui = "^4.60.5"
+python-dateutil = "^2.8.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
