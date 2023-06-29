@@ -6,6 +6,7 @@ from time import sleep
 import sys
 from datetime import datetime
 from dateutil import rrule
+from typing import List
 
 import PySimpleGUI as sg
 
@@ -58,10 +59,19 @@ def copy_local(to_path: Path):
 
 def find_files_containing(path, contains):
     l = []
-    for p in path.glob("*{}*".format(contains)):
+    for p in path.glob(contains):
         if p.is_file():
             l.append(p)
     return l
+
+def match_file_substr_multi(
+        path: Path,
+        substrings: list,
+    ) -> List[Path]:
+    res: List[Path] = []
+    for s in substrings:
+        res = res + find_files_containing(path, s)
+    return res
 
 def get_month_list(
         start_date: datetime,
@@ -95,8 +105,13 @@ def copy_files(
     mdop = dict(zip(month_dates, out_paths))
     for d, p in mdop.items():
         sg.Print(p)
-        day_file_string = d.strftime('_%Y%m')
-        in_files = find_files_containing(path_in, day_file_string)
+        in_files = match_file_substr_multi(
+            path_in,
+            [
+                d.strftime("*_%Y%m*"),
+                d.strftime("%Y%m??_*"),
+            ],
+        )
         for j, infile in enumerate(in_files, 1):
             out_file = p / infile.name
             sg.Print(out_file)
@@ -112,9 +127,8 @@ while True:
     if event in (sg.WINDOW_CLOSED, "Exit"):
         break
     if event == 'Copy to temporary directory':
-        print(build_copy_local_command(values['temp_dir']))
-        # copy_local_cmd = build_copy_local_command()
-        # run_sg_shell_command(copy_local_cmd, window=window)
+        copy_local_cmd = build_copy_local_command(values['temp_dir'])
+        run_sg_shell_command(copy_local_cmd, window=window)
     if event == 'Copy to final directory':
         copy_files(
             path_in = Path(values['temp_dir']),
