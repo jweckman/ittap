@@ -6,7 +6,6 @@ from time import sleep
 import sys
 from datetime import datetime
 from dateutil import rrule
-from typing import List
 
 import PySimpleGUI as sg
 
@@ -67,8 +66,8 @@ def find_files_containing(path, contains):
 def match_file_substr_multi(
         path: Path,
         substrings: list,
-    ) -> List[Path]:
-    res: List[Path] = []
+    ) -> list:
+    res = []
     for s in substrings:
         res = res + find_files_containing(path, s)
     return res
