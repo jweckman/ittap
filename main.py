@@ -156,7 +156,7 @@ if __name__ == '__main__':
 
     copy_button = ttk.Button(
         frm,
-        text="Choose directory",
+        text="Organize Files by Year and Month",
         command = lambda: copy_files(
             path_in = Path(dirselector_raw.widgets[2]['text']),
             path_out = Path(dirselector_organized.widgets[2]['text']),
