@@ -7,33 +7,49 @@ import sys
 from datetime import datetime
 from dateutil import rrule
 
-import PySimpleGUI as sg
+from tkinter import *
+from tkinter import ttk
+from tkinter.filedialog import askopenfilename, askdirectory
+import tkinter.scrolledtext as st 
 
-layout = [
-    [sg.Text("Temporary File Directory:"), sg.Input(default_text = str(Path().home() / 'camera'), key="temp_dir")],
-    [sg.Button("Copy to temporary directory")],
-    [sg.Text("Final File Directory:"), sg.Input(default_text = str(Path().home() / 'organized_pictures'), key="final_dir")],
-    [sg.Text("Start Date (YYYY-MM-DD):"), sg.Input(key="start_date")],
-    [sg.Button("Copy to final directory")],
-    [sg.Exit()],
-]
+root = Tk()
+root.title = 'ITTAP'
+frm = ttk.Frame(root, padding=20)
+frm.grid()
 
-window = sg.Window("Phone Picture Backup", layout)
+class TkDirSelector:
+    '''
+    Builder that also contains set of widgets that allow for setting a path.
+    '''
 
-def run_sg_shell_command(
-    cmd,
-    timeout=None,
-    window=None,
-):
-    p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output = ''
-    for line in p.stdout:
-        line = line.decode(errors='replace' if (sys.version_info) < (3, 5) else 'backslashreplace').rstrip()
-        output += line
-        print(line)
-        window.Refresh() if window else None
-    retval = p.wait(timeout)
-    return (retval, output)  
+    def __init__(
+        self,
+        row: int = 0,
+        label: str = "select directory",
+        default_dir: str = "",
+    ):
+        self.row = row
+        self.label = label
+        self.default_dir = default_dir
+        self.widgets: list = self.create()
+
+    def create(self):
+        label = ttk.Label(frm, text=self.label)
+        label.grid(column=0, row=self.row)
+        ask_dir_button = ttk.Button(frm, text="Choose directory", command=self.update_selection)
+        ask_dir_button.grid(column=1, row=self.row)
+        ask_dir_selection = ttk.Label(frm, text="")
+        ask_dir_selection.grid(column=2, row=self.row)
+        return [label, ask_dir_button, ask_dir_selection]
+
+    def update_selection(self):
+        directory = askdirectory()
+        self.widgets[2].config(text=directory)
+
+def print_user_info(txt: str):
+    global scrolled_text
+    scrolled_text.insert(INSERT, f"{txt}\n")
+    scrolled_text.see(END)
 
 def build_copy_local_command(
     to_path: Path,
@@ -109,9 +125,9 @@ def copy_files(
         end_date = datetime.now()
     month_dates = get_month_list(start_date, end_date)
     out_paths = create_folder_paths(path_out, month_dates)
-    mdop = dict(zip(month_dates, out_paths))
-    for d, p in mdop.items():
-        sg.Print(p)
+    mont_date_out_paths = dict(zip(month_dates, out_paths))
+    for d, p in mont_date_out_paths.items():
+        print_user_info(p)
         in_files = match_file_substr_multi(
             path_in,
             [
@@ -121,25 +137,38 @@ def copy_files(
         )
         for j, infile in enumerate(in_files, 1):
             out_file = p / infile.name
-            sg.Print(out_file)
+            print_user_info(out_file)
             if not out_file.is_file():
                 msg = '{}/{}'.format(str(j), str(len(in_files)))
-                sg.Print(msg)
+                print_user_info(msg)
                 sleep(0.001)
                 shutil.copy(infile, p)
+    print_user_info("Files copied successfully!")
 
-while True:
-    event, values = window.read()
-    print(event, values)
-    if event in (sg.WINDOW_CLOSED, "Exit"):
-        break
-    if event == 'Copy to temporary directory':
-        copy_local_cmd = build_copy_local_command(values['temp_dir'])
-        run_sg_shell_command(copy_local_cmd, window=window)
-    if event == 'Copy to final directory':
-        copy_files(
-            path_in = Path(values['temp_dir']),
-            path_out = Path(values['final_dir']),
-            start_date = datetime.strptime(values['start_date'], '%Y-%m-%d'),
+if __name__ == '__main__':
+    dirselector_raw = TkDirSelector(0, "Raw phone camera pictures directory:")
+    dirselector_organized = TkDirSelector(1, "Organized pictures directory:")
+
+    start_date_label = ttk.Label(frm, text="Start date (YYYY-MM-DD):")
+    start_date_label.grid(column=0, row=2)
+    start_date = Text(frm, height=1, width=15)
+    start_date.grid(column=1, row=2)
+
+    copy_button = ttk.Button(
+        frm,
+        text="Choose directory",
+        command = lambda: copy_files(
+            path_in = Path(dirselector_raw.widgets[2]['text']),
+            path_out = Path(dirselector_organized.widgets[2]['text']),
+            start_date = datetime.strptime(start_date.get("1.0",'end-1c'), '%Y-%m-%d'),
             end_date = datetime.now(),
         )
+    )
+    copy_button.grid(column=0, row=4)
+
+    scrolled_text = st.ScrolledText(frm)
+    scrolled_text.grid(column=0, row=5)
+
+    ttk.Button(frm, text="Quit", command=root.destroy).grid(column=0, row=6)
+    root.mainloop()
+
