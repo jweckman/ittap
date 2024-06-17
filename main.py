@@ -1,4 +1,4 @@
-from pathlib import Path, PurePosixPath 
+from pathlib import Path
 import shutil
 import os
 import subprocess
@@ -20,7 +20,11 @@ layout = [
 
 window = sg.Window("Phone Picture Backup", layout)
 
-def run_sg_shell_command(cmd, timeout=None, window=None):
+def run_sg_shell_command(
+    cmd,
+    timeout=None,
+    window=None,
+):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output = ''
     for line in p.stdout:
@@ -31,7 +35,9 @@ def run_sg_shell_command(cmd, timeout=None, window=None):
     retval = p.wait(timeout)
     return (retval, output)  
 
-def build_copy_local_command(to_path: Path):
+def build_copy_local_command(
+    to_path: Path,
+):
     '''
     Builds the shell copy command used to fetch all the pictures
     from the phone memory using MTP and user id.
@@ -52,7 +58,9 @@ def build_copy_local_command(to_path: Path):
     final_command = f"{cd_commands} && {copy_command}. {to_path}"
     return final_command
 
-def copy_local(to_path: Path):
+def copy_local(
+    to_path: Path,
+):
     cmd = build_copy_local_command(to_path)
     os.system(cmd)
 
@@ -64,24 +72,24 @@ def find_files_containing(path, contains):
     return l
 
 def match_file_substr_multi(
-        path: Path,
-        substrings: list,
-    ) -> list:
-    res = []
+    path: Path,
+    substrings: list,
+) -> list:
+    res: list = []
     for s in substrings:
         res = res + find_files_containing(path, s)
     return res
 
 def get_month_list(
-        start_date: datetime,
-        end_date: datetime,
-    ) -> list:
+    start_date: datetime,
+    end_date: datetime,
+) -> list:
     return list(rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date))
 
 def create_folder_paths(
-        path_out: Path,
-        month_dates: list
-    ) -> list:
+    path_out: Path,
+    month_dates: list
+) -> list:
     paths = []
     for d in month_dates:
         p = path_out / d.strftime('%Y')
@@ -92,11 +100,11 @@ def create_folder_paths(
     return paths
 
 def copy_files(
-        path_in: Path,
-        path_out: Path,
-        start_date: datetime,
-        end_date: datetime | None = None
-    ):
+    path_in: Path,
+    path_out: Path,
+    start_date: datetime,
+    end_date: datetime | None = None
+):
     if not end_date:
         end_date = datetime.now()
     month_dates = get_month_list(start_date, end_date)
