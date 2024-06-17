@@ -8,7 +8,6 @@ packages = [{include = "phone_picture_backup"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pysimplegui = "^4.60.5"
 python-dateutil = "^2.8.2"
 
 
