@@ -12,7 +12,7 @@ from tkinter import ttk
 from tkinter.filedialog import askopenfilename, askdirectory
 import tkinter.scrolledtext as st 
 
-root = Tk()
+root = Tk(className='Ittap')
 root.title = 'ITTAP'
 frm = ttk.Frame(root, padding=20)
 frm.grid()
