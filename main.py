@@ -14,8 +14,15 @@ import tkinter.scrolledtext as st
 
 root = Tk(className='Ittap')
 root.title = 'ITTAP'
-frm = ttk.Frame(root, padding=20)
-frm.grid()
+
+frm_main = ttk.Frame(root, padding=20)
+frm_main.grid()
+
+frm_log = ttk.Frame(root, padding=20)
+frm_log.grid()
+
+frm_footer = ttk.Frame(root, padding=20)
+frm_footer.grid()
 
 root.tk.call("source", "azure.tcl")
 root.tk.call("set_theme", "dark")
@@ -37,11 +44,11 @@ class TkDirSelector:
         self.widgets: list = self.create()
 
     def create(self):
-        label = ttk.Label(frm, text=self.label)
+        label = ttk.Label(frm_main, text=self.label, padding=10)
         label.grid(column=0, row=self.row)
-        ask_dir_button = ttk.Button(frm, text="Choose directory", command=self.update_selection)
+        ask_dir_button = ttk.Button(frm_main, text="Choose directory", command=self.update_selection)
         ask_dir_button.grid(column=1, row=self.row)
-        ask_dir_selection = ttk.Label(frm, text="")
+        ask_dir_selection = ttk.Label(frm_main, text="", padding=10)
         ask_dir_selection.grid(column=2, row=self.row)
         return [label, ask_dir_button, ask_dir_selection]
 
@@ -152,26 +159,27 @@ if __name__ == '__main__':
     dirselector_raw = TkDirSelector(0, "Raw phone camera pictures directory:")
     dirselector_organized = TkDirSelector(1, "Organized pictures directory:")
 
-    start_date_label = ttk.Label(frm, text="Start date (YYYY-MM-DD):")
+    start_date_label = ttk.Label(frm_main, text="Start date (YYYY-MM-DD):", padding=10)
     start_date_label.grid(column=0, row=2)
-    start_date = Text(frm, height=1, width=15)
+    start_date = Text(frm_main, height=1, width=15)
     start_date.grid(column=1, row=2)
 
     copy_button = ttk.Button(
-        frm,
+        frm_main,
         text="Organize Files by Year and Month",
         command = lambda: copy_files(
             path_in = Path(dirselector_raw.widgets[2]['text']),
             path_out = Path(dirselector_organized.widgets[2]['text']),
             start_date = datetime.strptime(start_date.get("1.0",'end-1c'), '%Y-%m-%d'),
             end_date = datetime.now(),
-        )
+        ),
+        padding=10
     )
     copy_button.grid(column=0, row=4)
 
-    scrolled_text = st.ScrolledText(frm)
+    scrolled_text = st.ScrolledText(frm_log)
     scrolled_text.grid(column=0, row=5)
 
-    ttk.Button(frm, text="Quit", command=root.destroy).grid(column=0, row=6)
+    ttk.Button(frm_footer, text="Quit", command=root.destroy).grid(column=0, row=6)
     root.mainloop()
 
