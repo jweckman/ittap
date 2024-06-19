@@ -17,6 +17,9 @@ root.title = 'ITTAP'
 frm = ttk.Frame(root, padding=20)
 frm.grid()
 
+root.tk.call("source", "azure.tcl")
+root.tk.call("set_theme", "dark")
+
 class TkDirSelector:
     '''
     Builder that also contains set of widgets that allow for setting a path.
