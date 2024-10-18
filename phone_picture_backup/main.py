@@ -6,6 +6,7 @@ from time import sleep
 import sys
 from datetime import datetime
 from dateutil import rrule
+import importlib.resources
 
 from tkinter import *
 from tkinter import ttk
@@ -24,8 +25,10 @@ frm_log.grid()
 frm_footer = ttk.Frame(root, padding=20)
 frm_footer.grid()
 
-root.tk.call("source", "azure.tcl")
-root.tk.call("set_theme", "dark")
+theme_file = importlib.resources.files('phone_picture_backup').joinpath('azure.tcl')
+with importlib.resources.as_file(theme_file) as theme_path:
+    root.tk.call("source", theme_path)
+    root.tk.call("set_theme", "dark")
 
 class TkDirSelector:
     '''
@@ -155,7 +158,7 @@ def copy_files(
                 shutil.copy(infile, p)
     print_user_info("Files copied successfully!")
 
-if __name__ == '__main__':
+def main():
     dirselector_raw = TkDirSelector(0, "Raw phone camera pictures directory:")
     dirselector_organized = TkDirSelector(1, "Organized pictures directory:")
 
@@ -182,4 +185,8 @@ if __name__ == '__main__':
 
     ttk.Button(frm_footer, text="Quit", command=root.destroy).grid(column=0, row=6)
     root.mainloop()
+
+
+if __name__ == '__main__':
+    main()
 
