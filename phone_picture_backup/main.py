@@ -25,12 +25,21 @@ frm_log.grid()
 frm_footer = ttk.Frame(root, padding=20)
 frm_footer.grid()
 
-scrolled_text = st.ScrolledText(frm_log)
-
 theme_file = importlib.resources.files('phone_picture_backup').joinpath('azure.tcl')
 with importlib.resources.as_file(theme_file) as theme_path:
     root.tk.call("source", theme_path)
     root.tk.call("set_theme", "dark")
+
+class SingleScroll:
+    """ Singleton ScrolledText object. """
+    def __new__(cls, master):
+        if '_inst' not in vars(cls):  # Create instance?
+            scroll = st.ScrolledText(master, width=90, height=15)
+            scroll.grid(column=0, row=5, columnspan=6, sticky='W')
+            scroll.insert(INSERT, " OK here\n")
+            cls._inst = scroll
+
+        return cls._inst
 
 class TkDirSelector:
     '''
@@ -62,7 +71,7 @@ class TkDirSelector:
         self.widgets[2].config(text=directory)
 
 def print_user_info(txt: str):
-    global scrolled_text
+    scrolled_text = SingleScroll(frm_log)
     scrolled_text.insert(INSERT, f"{txt}\n")
     scrolled_text.see(END)
 
@@ -156,6 +165,7 @@ def copy_files(
             if not out_file.is_file():
                 msg = '{}/{}'.format(str(j), str(len(in_files)))
                 print_user_info(msg)
+                SingleScroll._inst.see(END)
                 sleep(0.001)
                 shutil.copy(infile, p)
     print_user_info("Files copied successfully!")
@@ -181,8 +191,6 @@ def main():
         padding=10
     )
     copy_button.grid(column=0, row=4)
-
-    scrolled_text.grid(column=0, row=5)
 
     ttk.Button(frm_footer, text="Quit", command=root.destroy).grid(column=0, row=6)
     root.mainloop()
