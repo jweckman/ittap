@@ -25,6 +25,8 @@ frm_log.grid()
 frm_footer = ttk.Frame(root, padding=20)
 frm_footer.grid()
 
+scrolled_text = st.ScrolledText(frm_log)
+
 theme_file = importlib.resources.files('phone_picture_backup').joinpath('azure.tcl')
 with importlib.resources.as_file(theme_file) as theme_path:
     root.tk.call("source", theme_path)
@@ -180,7 +182,6 @@ def main():
     )
     copy_button.grid(column=0, row=4)
 
-    scrolled_text = st.ScrolledText(frm_log)
     scrolled_text.grid(column=0, row=5)
 
     ttk.Button(frm_footer, text="Quit", command=root.destroy).grid(column=0, row=6)
